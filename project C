@@ -1,0 +1,1619 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct fich
+{
+char nom[15];
+int type; //1->repertoire 0->fichier
+struct fich* pere;
+struct fich* fils;
+struct fich* frere;
+}noeud;
+
+2->volume
+
+typedef struct Corbeille
+{
+noeud* fich; //1->repertoire 0->fichier
+struct Corbeille* suivant;
+}Corbeille;
+
+2->volume
+
+int verifyrep(noeud* courant,char* nom);
+noeud* cvolume();
+noeud* cvolume()
+{
+noeud* volum=malloc(sizeof(noeud));
+noeud* pere;
+char *nom;
+printf("quel est le nom du volume? \n");
+gets(nom);
+strcpy(volum->nom,"" );
+volum->type=3;
+volum->frere=NULL;
+volum->pere=NULL;
+volum->fils=malloc(sizeof(noeud));
+pere=volum;
+volum=volum->fils;
+strcpy(volum->nom,nom);
+volum->type=2;
+volum->fils=NULL;
+volum->frere=NULL;
+volum->pere=pere;
+return volum;
+
+}
+void ajoutervolume(noeud* d)
+{
+char nom[20];
+noeud* pere;
+int acc;
+printf("donner le nom du volume a ajouter\n");
+gets(nom);
+while(d->pere!=NULL)
+{
+d=d->pere;
+}
+pere=d;
+d=d->fils;
+acc=verifyrep(pere,nom);
+if(acc==1)
+{
+while(d->frere!=NULL)
+{
+d=d->frere;
+}
+d->frere=malloc(sizeof(noeud));
+strcpy(d->frere->nom,nom);
+d->frere->type=2;
+d->frere->fils=NULL;
+d->frere->frere=NULL;
+d->frere->pere=pere;
+
+
+
+printf("volume %s ajoute \n ",nom);
+}
+else
+{
+printf("un volume avec ce meme nom est deja cree\n");
+}
+}
+//---------------------------------------------->
+void listervolumes(noeud* courant)
+{
+while(courant->pere!=NULL)
+{
+courant=courant->pere;
+}
+courant=courant->fils;
+while(courant!=NULL)
+{
+printf("%s\t",courant->nom);
+courant=courant->frere;
+}
+printf("\n");
+}
+//-------------------------------------------------char* pwd(noeud* courant)
+{
+char nom[100]="";
+char chemin[160]="";
+char dir[100]="/";
+while(courant->pere!=NULL)
+{
+strcpy(dir,"/");
+strcpy(nom,courant->nom);
+strcat(nom,chemin);
+strcpy(chemin,nom);
+strcat(dir,chemin);
+strcpy(chemin,dir);
+courant=courant->pere;
+}
+strcpy(dir,courant->nom);
+strcat(dir,chemin);
+printf("%s\n",dir);
+return dir;
+}
+//-------------------------------------------//---------------------------------------noeud* cdrelatif(char* dir,noeud* courant)
+{
+char nom[15];
+char *str=dir;
+int i;
+noeud* fil;
+if((*dir)=='/')
+{
+dir++;
+}
+strcpy(nom,dir);
+if(strcmp(dir,"")==0)
+{
+return courant;
+}
+i=0;
+while((*dir)!='/' && (*dir)!='\0')
+{
+i++;
+
+dir=dir+1;
+}
+nom[i]='\0';
+if (courant==NULL)
+{
+printf("pas de volume cree\n");
+}
+else
+{
+fil=courant->fils;
+if(fil!=NULL)
+{
+while(fil!=NULL && strcmp(fil->nom,nom)!=0)
+{
+fil= fil->frere;
+}
+
+if(fil!=NULL)
+{
+if(fil->type==0)
+{
+printf("ce dir est un fichier impossible d'acceder");
+return NULL;
+}
+else
+{
+cdrelatif(dir,fil);}
+}
+else
+{
+printf("ce dir n'existe pas\n");
+return NULL;
+}
+}
+else{printf("ce dir n'existe pas\n");return NULL;}
+}
+}
+//--------------------------------------------------------noeud* cd(char* dir,noeud* courant)
+{
+char nom[15];
+char *str=dir;
+int i;
+noeud* fil;
+if((*dir)=='/')
+{
+dir++;
+}
+strcpy(nom,dir);
+if(strcmp(dir,"")==0)
+{
+return courant;
+}
+
+
+
+i=0;
+while((*dir)!='/' && (*dir)!='\0')
+{
+i++;
+dir=dir+1;
+}
+nom[i]='\0';
+if (courant==NULL)
+{
+printf("pas de volume cree\n");
+}
+else
+{
+fil=courant->fils;
+if(fil!=NULL)
+{
+while(fil!=NULL && strcmp(fil->nom,nom)!=0)
+{
+fil= fil->frere;
+}
+
+if(fil!=NULL)
+{
+cd(dir,fil);
+}
+else
+{
+printf("ce dir n'existe pas\n");
+return NULL;
+}
+}
+else{printf("ce dir n'existe pas\n");return NULL;}
+}
+}
+
+//-----------------noeud* coller(char *dir,noeud* courant,int type,char nom[])
+{
+char chemin[30];
+int i;
+noeud* pere=courant;
+noeud * cour;
+if(courant==NULL)
+{
+printf("aucun volume n'est crée");
+}
+else
+{
+if(strcmp(dir,"")==0) //chemin relatif
+{
+fflush(stdin);
+if(courant->fils==NULL)
+{
+courant->fils=malloc(sizeof(noeud));
+courant->fils->pere=courant;
+strcpy(courant->fils->nom,nom);
+courant->fils->type=type;
+courant->fils->frere=NULL;
+courant->fils->fils=NULL;
+return(courant->fils) ;
+}
+else
+{
+courant=courant->fils;
+while(courant->frere!=NULL)
+{
+courant=courant->frere;
+}
+courant->frere=malloc(sizeof(noeud));
+courant->frere->fils=NULL;
+courant->frere->type=type;
+courant->frere->pere=pere;
+courant->frere->frere=NULL;
+strcpy(courant->frere->nom,nom);
+return courant->frere;
+}
+}
+}
+}
+//--------------------------------------------------------->
+void ajouterrepertoire(char *dir,noeud* courant,int type)
+{
+char nom[20];
+char chemin[30];
+int i;
+int acc;
+noeud* pere=courant;
+noeud * cour;
+if(courant==NULL)
+{
+printf("aucun volume n'est crée");
+}
+else
+{
+if(strcmp(dir,"")==0) //chemin relatif
+{
+if(type==1)
+{printf("donner le nom du repertoire
+else
+{
+printf("donner le nom du fichier
+}
+fflush(stdin);
+gets(nom);
+acc=verifyrep(courant,nom);
+
+");}
+");
+
+if(acc==1)
+{
+if(courant->fils==NULL)
+{
+courant->fils=malloc(sizeof(noeud));
+courant->fils->pere=courant;
+strcpy(courant->fils->nom,nom);
+courant->fils->type=type;
+courant->fils->frere=NULL;
+courant->fils->fils=NULL;
+if(type==1)
+{
+printf("repertoire cree \n");
+
+}
+else
+{
+printf("fichier cree \n");
+}
+}
+else
+{
+courant=courant->fils;
+while(courant->frere!=NULL)
+{
+courant=courant->frere;
+}
+courant->frere=malloc(sizeof(noeud));
+courant->frere->fils=NULL;
+courant->frere->type=type;
+courant->frere->pere=pere;
+courant->frere->frere=NULL;
+strcpy(courant->frere->nom,nom);
+if(type==1)
+{
+printf("repertoire cree \n");
+}
+else
+{
+printf("fichier cree \n");
+}
+}
+}
+else
+{
+printf("un repertoire/fichier avec le meme nom existe deja\n");
+}
+}
+else
+{
+cour=cdrelatif(dir,courant);
+if(cour!=NULL)
+{
+ajouterrepertoire("",cour,type);
+}
+
+}
+}
+}
+//---------------------------------------------------------------void renommer(noeud* courant)
+{
+char nom[20];
+int acc;
+printf("donner le nouveau nom\n");
+gets(nom);
+acc=verifyrep(courant->pere,nom);
+if(acc==1)
+{strcpy(courant->nom,nom);
+printf("operation reussie \n");
+}
+else
+{
+printf("il existe deja un fichier/rep avec le meme nom\n");
+}
+}
+//---------------------------------------------------------------------------------void create(noeud* pere,noeud* cour,int type,char* nom)
+{
+cour=(noeud*)malloc(sizeof(noeud));
+cour->fils=NULL;
+cour->frere=NULL;
+strcpy(cour->nom,nom);
+cour->pere=pere;
+cour->type=type;
+}
+//----------------------------------------------------------------------------------------void copy(noeud* couranttry,noeud* cour)
+{
+if(couranttry!=NULL)
+{
+coller("",cour,couranttry->type,couranttry->nom);
+copy(couranttry->frere,cour);
+cour=cour->fils;
+while(strcmp(cour->nom,couranttry->nom)!=0)
+{
+cour=cour->frere;
+}
+copy(couranttry->fils,cour);
+}
+}
+//------------------------------------------------------------------------------------------void cp(noeud* courant)
+{
+char direction[20];
+char direction2[20];
+char rep[1],rep2[1];
+noeud* e;
+noeud* past;
+noeud* couranttry;
+noeud* cour;
+int acc;
+printf("donner le chemin du fichier/repertoire à copier\n");
+gets(direction);
+if(direction[0]!='/')
+{
+couranttry=cd(direction,courant);
+if(couranttry!=NULL)
+{
+printf("donner le chemin ou coller \n");
+fflush(stdin);
+gets(direction2);
+//-------if(direction2[0]!='/')
+{
+cour=cd(direction2,courant);
+if(cour!=NULL)
+{
+acc=verifyrep(cour,couranttry->nom);
+if(acc==1)
+{
+if(couranttry->type==0)
+{coller("",cour,couranttry->type,couranttry->nom);}
+else
+{
+past=coller("",cour,couranttry->type,couranttry->nom);
+copy(couranttry->fils,past);
+}
+}
+else
+{
+printf("rep/fichier avec le meme nom existe deja\n");
+}
+}
+}
+else
+{
+e=courant;
+if(e!=NULL)
+while(e->pere!=NULL)
+{
+
+
+e=e->pere;
+}
+cour=cd(direction2,e);
+if(cour!=NULL)
+{
+acc=verifyrep(cour,couranttry->nom);
+if(acc==1)
+{
+if(couranttry->type==0)
+{coller("",cour,couranttry->type,couranttry->nom);}
+else
+{
+past=coller("",cour,couranttry->type,couranttry->nom);
+copy(couranttry->fils,past);
+}
+}
+else
+{
+printf("rep/fichier avec ce meme nom existe deja\n");
+}
+}
+}
+//--}
+}
+else
+{
+e=courant;
+if(e!=NULL)
+{
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+couranttry=cd(direction,e);
+if(couranttry!=NULL)
+{
+printf("donner le chemin ou coller le fichier\n");
+gets(direction2);
+//-------if(direction2[0]!='/')
+{
+cour=cd(direction2,courant);
+if(cour!=NULL)
+{
+acc=verifyrep(cour,couranttry->nom);
+if(acc==1)
+{
+if(couranttry->type==0)
+{coller("",cour,couranttry->type,couranttry->nom);}
+else
+{
+past=coller("",cour,couranttry->type,couranttry->nom);
+copy(couranttry->fils,past);
+}
+}
+else{printf("rep/fichier avec le meme nom existe deja\n");}
+}
+}
+else
+{
+e=courant;
+if(e!=NULL)
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+cour=cd(direction2,e);
+
+
+
+if(cour!=NULL)
+{
+acc=verifyrep(cour,couranttry->nom);
+if(acc==1)
+{
+if(couranttry->type==0)
+{coller("",cour,couranttry->type,couranttry->nom);}
+else
+{
+past=coller("",cour,couranttry->type,couranttry->nom);
+copy(couranttry->fils,past);
+}
+}
+else
+{
+printf("fichier/rep avec ce nom existe deja\n");
+}
+}
+}
+}
+}
+}
+}
+//---------------------------------------------------------------------------------------int verifyrep(noeud* courant,char* nom)
+{
+int i=1;
+courant=courant->fils;
+while(courant!=NULL)
+{
+if(strcmp(courant->nom,nom)==0)
+{
+i=0;
+break;
+}
+courant=courant->frere;
+}
+return i ;
+}
+//-----------------------------------------------------------------------------------------void deplacer(noeud* courant)
+{
+char direction[20];
+char direction2[20];
+char rep[1],rep2[1];
+noeud* e;
+noeud* couranttry;
+noeud* cour;
+int acc;
+printf("donner le chemin du fichier ou rep a deplacer\n");
+gets(direction);
+if(direction[0]!='/')
+{
+couranttry=cd(direction,courant);
+if(couranttry!=NULL)
+{
+printf("donner le chemin ou deplacer le fichier\n");
+fflush(stdin);
+gets(direction2);
+//-------if(direction2[0]!='/')
+{
+cour=cd(direction2,courant);
+if(cour!=NULL)
+{
+acc=verifyrep(cour,couranttry->nom);
+if(acc==1)
+
+
+{
+e=couranttry->pere;
+e=e->fils;
+if(e==couranttry)
+{
+e->pere->fils=couranttry->frere;
+}
+else
+{
+while(e->frere!=couranttry)
+{
+e=e->frere;
+}
+e->frere=couranttry->frere;
+}
+dep(couranttry,cour);
+}
+else{printf("rep/fichier avec ce nom existe deja\n");}
+}
+}
+else
+{
+e=courant;
+if(e!=NULL)
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+cour=cd(direction2,e);
+if(cour!=NULL)
+{
+acc=verifyrep(cour,couranttry->nom);
+if(acc==1)
+{
+e=couranttry->pere;
+e=e->fils;
+if(e==couranttry)
+{
+e->pere->fils=couranttry->frere;
+}
+else
+{
+while(e->frere!=couranttry)
+{
+e=e->frere;
+}
+e->frere=couranttry->frere;
+}
+
+dep(couranttry,cour);}
+else {printf("rep/fichier avec ce meme nom existe deja\n");}
+}
+}
+//--}
+}
+else
+{
+e=courant;
+if(e!=NULL)
+{
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+couranttry=cd(direction,e);
+if(couranttry!=NULL)
+
+{
+printf("donner le chemin ou coller le fichier");
+gets(direction2);
+//-------if(direction2[0]!='/')
+{
+cour=cd(direction2,courant);
+if(cour!=NULL)
+{
+acc=verifyrep(cour,couranttry->nom);
+if(acc==1)
+{
+e=couranttry->pere;
+e=e->fils;
+if(e==couranttry)
+{
+e->pere->fils=couranttry->frere;
+}
+else
+{
+while(e->frere!=couranttry)
+{
+e=e->frere;
+}
+e->frere=couranttry->frere;
+}
+
+dep(couranttry,cour);}
+else
+{
+printf("rep/fichier avec ce meme nom existe deja\n");
+}
+}
+}
+else
+{
+e=courant;
+if(e!=NULL)
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+cour=cd(direction2,e);
+if(cour!=NULL)
+{
+acc=verifyrep(cour,couranttry->nom);
+if(acc==1)
+{
+e=couranttry->pere;
+e=e->fils;
+if(e==couranttry)
+{
+e->pere->fils=couranttry->frere;
+}
+else
+{
+while(e->frere!=couranttry)
+{
+e=e->frere;
+}
+e->frere=couranttry->frere;
+}
+dep(couranttry,cour);}
+else
+{
+printf("rep/fichier avec ce meme nom existe deja\n");
+
+}
+}
+}
+}
+}
+}
+}
+//-----------------------------------------------------------------------------------void dep(noeud* source,noeud* cible)
+{
+noeud* pere=cible;
+if(cible->type==0)
+{
+printf("impossible c'est un fichier\n");
+}
+else
+{
+if(cible->fils==NULL)
+{
+cible->fils=source;
+cible->fils->pere=cible;
+cible->fils->frere=NULL;
+if(source->type==1)
+{
+printf("repertoire deplace \n");
+}
+else
+{
+printf("fichier deplace \n");
+}
+}
+else
+{
+cible=cible->fils;
+while(cible->frere!=NULL)
+{
+cible=cible->frere;
+}
+cible->frere=source;
+cible->frere->pere=pere;
+cible->frere->frere=NULL;
+if(source->type==1)
+{
+printf("repertoire deplace \n");
+}
+else
+{
+printf("fichier deplace \n");
+}
+}
+}
+}
+//-----------------------------------------------------------------------------------------void rechercheA(char* nom,int type,noeud* courant,char* recherche)
+{
+if(courant!=NULL)
+{
+if(strcmp(courant->nom,nom)==0 && courant->type==type)
+{
+strcat(recherche,pwd(courant));
+strcat(recherche,"\n");
+}
+rechercheA(nom,type,courant->frere,recherche);
+rechercheA(nom,type,courant->fils,recherche);
+}
+}
+////--------------------------------------------------------------------------------------void rechercheN(char* nom,int type,noeud* courant,int* ok)
+{
+if(courant!=NULL)
+{
+if(strcmp(courant->nom,nom)==0 && courant->type==type)
+{
+(*ok)= 1;
+}
+if((*ok) ==0)
+{
+rechercheN(nom,type,courant->frere,ok);
+rechercheN(nom,type,courant->fils,ok);
+}
+}
+}
+//------------------------------------------------------------------------------Corbeille* creer(noeud* couranttry)
+{
+Corbeille* trash;
+noeud* e;
+if(strcmp(couranttry->pere->nom,"")==0)
+{
+printf("vous ne pouvez pas supprimer un volume");
+return NULL;
+}
+else
+{
+e=couranttry->pere;
+e=e->fils;
+if(e==couranttry)
+{
+e->pere->fils=couranttry->frere;
+}
+else
+{
+while(e->frere!=couranttry)
+{
+e=e->frere;
+}
+e->frere=couranttry->frere;
+}
+couranttry->pere=NULL;
+couranttry->frere=NULL;
+trash=(Corbeille*)malloc(sizeof(Corbeille));
+trash->fich=couranttry;
+trash->suivant=NULL;
+return trash;
+}
+;
+}
+//---------------------------------------------------------------------------void vider(Corbeille* trash)
+{
+if(trash!=NULL)
+{
+vider(trash->suivant);
+free(trash);
+}
+}
+//----------------------------------------------------------------------------void Ajoutercorbeille(noeud* fich,Corbeille* trash)
+{
+while(trash->suivant !=NULL)
+{
+trash=trash->suivant;
+
+}
+trash->suivant=malloc(sizeof(Corbeille));
+trash->suivant->fich=fich;
+trash->suivant->suivant=NULL;
+
+}
+//------------------------------------------------------------------------void lib(noeud* couranttry)
+{
+if(couranttry!=NULL)
+{
+lib(couranttry->fils);
+lib(couranttry->frere);
+free(couranttry);
+}
+}
+//-------------------------------------------------------------------------void suppN(noeud* couranttry,Corbeille* trash)
+{
+noeud* e;
+Corbeille* p;
+if(strcmp(couranttry->pere->nom,"")==0)
+{
+printf("vous ne pouvez pas supprimer un volume");
+}
+else
+{
+e=couranttry->pere;
+e=e->fils;
+if(e==couranttry)
+{
+e->pere->fils=couranttry->frere;
+}
+else
+{
+while(e->frere!=couranttry)
+{
+e=e->frere;
+}
+e->frere=couranttry->frere;
+}
+couranttry->pere=NULL;
+couranttry->frere=NULL;
+Ajoutercorbeille(couranttry,trash);
+}
+}
+//------------------------------------------------------------------------------void suppD(noeud* couranttry)
+{
+noeud* e;
+if(strcmp(couranttry->pere->nom,"")==0)
+{
+printf("vous ne pouvez pas supprimer un volume");
+}
+else
+{
+e=couranttry->pere;
+e=e->fils;
+if(e==couranttry)
+{
+e->pere->fils=couranttry->frere;
+couranttry->pere=NULL;
+couranttry->frere=NULL;
+lib(couranttry);
+free(couranttry);
+}
+else
+{
+while(e->frere!=couranttry)
+{
+
+e=e->frere;
+}
+e->frere=couranttry->frere;
+couranttry->pere=NULL;
+couranttry->frere=NULL;
+lib(couranttry);
+free(couranttry);
+}
+}
+}
+//-----------------------------------------------------------------------------void listertrash(Corbeille* trash)
+{
+while(trash!=NULL)
+{
+printf("%s\n",trash->fich->nom);
+trash=trash->suivant;
+}
+}
+//--------------------------------------------------------------------------noeud* taketrash(Corbeille* trash,char* nom)
+{
+while(trash!=NULL && strcmp(nom,trash->fich->nom)!=0)
+{
+trash=trash->suivant;
+}
+if(trash!=NULL)
+{
+return trash->fich;
+}
+else
+{
+return NULL;
+}
+}
+//----------------------------------------------------------------------------void voir(noeud* courant)
+{
+char noms[110]="";
+courant=courant->fils;
+while(courant!=NULL)
+{
+strcat(noms,courant->nom);
+strcat(noms,"\t");
+courant=courant->frere;
+}
+printf("%s\n",noms);
+}
+void voiravancee(noeud* courant)
+{
+char noms[110]="";
+courant=courant->fils;
+while(courant!=NULL)
+{
+strcat(noms,courant->nom);
+strcat(noms,"\t");
+if(courant->type==0)
+{
+strcat(noms,"fichier");
+}
+else{strcat(noms,"repertoire");}
+strcat(noms,"\n");
+courant=courant->frere;
+}
+printf("%s\n",noms);
+}
+//-------------------------------------------------------------------------void main()
+{
+Corbeille* trash=NULL;
+
+Corbeille* vide=NULL;
+int quitter=0;
+char rep[1];
+int rep2;
+int choix;
+int ok=0;
+char recherche[400];
+char direction[20],direction2[20];
+noeud* volum;
+noeud *courant=NULL,*couranttry=NULL,*cour=NULL;
+noeud *e;
+while(quitter!=1)
+{
+printf("Voici le MENU \n1-cliquer sur 1 pour creer ou ajouter un
+volume\n2-lister les volumes\n3-savoir sa position courante\n4-voir les
+fichiers et les rep ls\n5-changer sa position courante \n6-créer un fichier
+ou rep\n7-renommer \n8-copier un fichier\n9-Deplacer un fichier ou
+repertoire\n10-Recherche\n11-Supprimer \n12-recuperer de la corbeille \n13vider la corbeille\n14- quitter\n");
+scanf("%d",&choix);
+fflush(stdin);
+switch (choix)
+{
+case 1:
+if(courant==NULL)
+{
+volum=cvolume();
+courant=volum;
+printf("volume cree\n");
+}
+else
+{
+ajoutervolume(courant);
+}
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+case 2:
+if(courant==NULL)
+{
+printf("pas de volume cree\n");
+}
+else
+{
+listervolumes(courant);
+}
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+case 3:
+if(courant==NULL)
+{
+printf("volume non crée\n");
+}
+else
+{pwd(courant);}
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+case 4:
+if(courant==NULL)
+{
+printf("volume non cree\n");
+}
+else
+{
+printf("voir normal ou avancée ? repondre par N/A \n");
+gets(rep);
+
+if(strcmp(rep,"N")==0)
+{
+voir(courant);
+}
+else
+{
+voiravancee(courant);
+}
+}
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+case 5:
+printf("donner la direction ou aller
+");
+fflush(stdin);
+scanf("%s",direction);
+fflush(stdin);
+strcpy(rep,"N");
+if(direction[0]!='/')
+{
+couranttry=cdrelatif(direction,courant);
+if(couranttry!=NULL)
+{
+courant=couranttry;
+}
+printf("($ %s ---->)",courant->nom);
+}
+else
+{
+e=courant;
+if(e!=NULL)
+{
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+couranttry=cdrelatif(direction,e);
+if(couranttry!=NULL)
+{
+courant=couranttry;
+}
+printf("($ %s ---->)",courant->nom);
+}
+}
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+case 6:
+printf("\n1:créer un repertoire\n0:créer un fichier : 1/0\n");
+scanf("%d",&rep2);
+fflush(stdin);
+printf("donner le chemin creer le fichier ou rien si en rep courant
+gets(direction);
+if(direction[0]!='/')
+{
+ajouterrepertoire(direction,courant,rep2);
+printf("($ %s ---->)",courant->nom);
+}
+else
+{
+e=courant;
+if(e!=NULL)
+{
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+
+");
+
+ajouterrepertoire(direction,e,rep2);
+printf("($ %s ---->)",courant->nom);
+}
+}
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+//--case 7:
+printf("donner le chemin du fichier ou repertoire a renommer
+gets(direction);
+if(direction[0]!='/')
+{
+couranttry=cd(direction,courant);
+if(couranttry!=NULL)
+{
+renommer(couranttry);
+}
+printf("($ %s ---->)",courant->nom);
+
+");
+
+}
+else
+{
+e=courant;
+if(e!=NULL)
+{
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+couranttry=cd(direction,e);
+if(couranttry!=NULL)
+{
+renommer(couranttry);
+}
+printf("($ %s ---->)",courant->nom);
+}
+}
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+case 8:
+cp(courant);
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+case 9:
+deplacer(courant);
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+case 10:
+printf("recherche Avancée ou normal ,cliquez sur H pour plus
+d'informations sinon A/N \n");
+gets(rep);
+if(rep[0]=='H')
+{
+printf("recherche normal\t:savoir l'existance du
+fichier/rep\nrecherche avancee\t:obtenir les chemins de tous les
+fichiers/rep recherchés\n");
+}
+if(rep[0]=='N')
+{
+//------------------------------------NORMAL--------------------------------------------------------------->
+printf("donner le chemin ou chercher le fichier sinon cliquer sur A
+golbal ");
+gets(direction2);
+
+if(strcmp(direction2,"A")==0)
+{
+e=courant;
+if(e!=NULL)
+{
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+printf("donner le nom du fichier/repertoire à rechercher\n");
+gets(direction);
+printf("rechercher les fichiers de meme nom ou repertoire ou les deux
+F/R/N:
+");
+gets(rep);
+if(rep[0]=='F')
+{
+ok=0;
+rechercheN(direction,0,e->fils ,&ok);
+if(ok==1)
+{
+printf("----->le fichier recherche existe \n");
+}
+else {printf("----->le fichier recherche n'existe pas\n");}
+}
+if(rep[0]=='R')
+{
+ok=0;
+rechercheN(direction,1,e->fils,&ok);
+if(ok==1)
+{
+printf("----->le fichier recherche existe \n");
+}
+else {printf("----->le fichier recherche n'existe pas\n");}
+}
+if(rep[0]=='N')
+{
+ok=0;
+rechercheN(direction,0,e->fils,&ok);
+rechercheN(direction,1,e->fils,&ok);
+if(ok==1)
+{
+printf("----->le fichier recherche existe\n ");
+}
+else {printf("----->le fichier recherche n'existe pas\n");}
+}
+}
+}
+else
+{
+if(direction2[0]!='/')
+{
+couranttry=cdrelatif(direction2,courant);
+if(couranttry!=NULL)
+{
+courant=couranttry;
+printf("donner le nom du fichier/repertoire à rechercher\n");
+gets(direction);
+printf("rechercher les fichiers de meme nom ou repertoire ou les deux
+F/R/N: ");
+gets(rep);
+if(rep[0]=='F')
+{
+ok=0;
+rechercheN(direction,0,couranttry->fils ,&ok);
+if(ok==1)
+{
+printf("----->le fichier recherche existe \n");
+}
+else {printf("----->le fichier recherche n'existe pas\n");}
+}
+if(rep[0]=='R')
+
+{
+ok=0;
+rechercheN(direction,1,couranttry->fils,&ok);
+if(ok==1)
+{
+printf("----->le fichier recherche existe \n");
+}
+else {printf("----->le fichier recherche n'existe pas\n");}
+}
+if(rep[0]=='N')
+{
+ok=0;
+rechercheN(direction,0,couranttry->fils,&ok);
+rechercheN(direction,1,couranttry->fils,&ok);
+if(ok==1)
+{
+printf("----->le fichier recherche existe \n");
+}
+else {printf("----->le fichier recherche n'existe pas\n");}
+}
+}
+}
+else
+{
+e=courant;
+if(e!=NULL)
+{
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+couranttry=cdrelatif(direction2,e);
+if(couranttry!=NULL)
+{
+courant=couranttry;
+printf("donner le nom du fichier/repertoire à rechercher\n");
+gets(direction);
+printf("rechercher les fichiers de meme nom ou repertoire ou les deux
+F/R/N:
+");
+gets(rep);
+if(rep[0]=='F')
+{
+ok=0;
+rechercheN(direction,0,couranttry->fils ,&ok);
+if(ok==1)
+{
+printf("----->le fichier recherche existe \n");
+}
+else {printf("----->le fichier recherche n'existe pas\n");}
+}
+if(rep[0]=='R')
+{
+ok=0;
+rechercheN(direction,1,couranttry->fils,&ok);
+if(ok==1)
+{
+printf("----->le fichier recherche existe \n");
+}
+else {printf("----->le fichier recherche n'existe pas\n");}
+}
+if(rep[0]=='N')
+{
+ok=0;
+rechercheN(direction,0,couranttry->fils,&ok);
+rechercheN(direction,1,couranttry->fils,&ok);
+if(ok==1)
+{
+printf("----->le fichier recherche existe \n");
+}
+
+
+else {printf("-----> le fichier recherche n'existe pas\n");}
+}
+}
+}
+}
+}
+}
+//------------------------------------NORMAL--------------------------------------------------------------->
+else
+{
+printf("donner le chemin ou chercher le fichier sinon cliquer sur A
+golbal ");
+gets(direction2);
+if(strcmp(direction2,"A")==0)
+{
+e=courant;
+if(e!=NULL)
+{
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+printf("donner le nom du fichier/repertoire à rechercher\n");
+gets(direction);
+printf("rechercher les fichiers de meme nom ou repertoire ou les deux
+F/R/N:
+");
+gets(rep);
+if(rep[0]=='F')
+{
+strcpy(recherche,"");
+rechercheA(direction,0,e->fils ,recherche);
+}
+if(rep[0]=='R')
+{
+strcpy(recherche,"");
+rechercheA(direction,1,e->fils,recherche);
+}
+if(rep[0]=='N')
+{
+strcpy(recherche,"");
+rechercheA(direction,0,e->fils,recherche);
+rechercheA(direction,1,e->fils,recherche);
+}
+}
+}
+else
+{
+if(direction2[0]!='/')
+{
+couranttry=cdrelatif(direction2,courant);
+if(couranttry!=NULL)
+{
+courant=couranttry;
+printf("donner le nom du fichier/repertoire à rechercher\n");
+gets(direction);
+printf("rechercher les fichiers de meme nom ou repertoire ou les deux
+F/R/N: ");
+gets(rep);
+if(rep[0]=='F')
+{
+strcpy(recherche,"");
+rechercheA(direction,0,couranttry->fils ,recherche);
+}
+if(rep[0]=='R')
+{
+strcpy(recherche,"");
+rechercheA(direction,1,couranttry->fils,recherche);
+
+
+if(ok==1)
+{
+printf("----->le fichier recherche existe \n");
+}
+else {printf("----->le fichier recherche n'existe pas\n");}
+}
+if(rep[0]=='N')
+{
+strcpy(recherche,"");
+rechercheA(direction,0,couranttry->fils,recherche);
+rechercheA(direction,1,couranttry->fils,recherche);
+}
+}
+}
+else
+{
+e=courant;
+if(e!=NULL)
+{
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+couranttry=cdrelatif(direction2,e);
+if(couranttry!=NULL)
+{
+courant=couranttry;
+printf("donner le nom du fichier/repertoire à rechercher\n");
+gets(direction);
+printf("rechercher les fichiers de meme nom ou repertoire ou les deux
+F/R/N:
+");
+gets(rep);
+if(rep[0]=='F')
+{
+strcpy(recherche,"");
+rechercheA(direction,0,couranttry->fils ,recherche);
+}
+if(rep[0]=='R')
+{
+strcpy(recherche,"");
+rechercheA(direction,1,couranttry->fils,&ok);
+}
+if(rep[0]=='N')
+{
+strcpy(recherche,"");
+rechercheA(direction,0,couranttry->fils,&ok);
+rechercheA(direction,1,couranttry->fils,&ok);
+}
+}
+}
+}
+}
+}
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+case 11:
+printf("donner le chemin du fichier/rep a supprimer\n");
+gets(direction);
+printf("voulez-vous le supprimer definitivement? Y/N\n");
+gets(rep);
+if(rep[0]=='N')
+{
+if(direction[0]!='/')
+{
+
+
+couranttry=cd(direction,courant);
+if(couranttry!=NULL)
+{
+if(trash==NULL)
+{
+trash=creer(couranttry);
+}
+else
+{suppN(couranttry,trash);}
+}
+}
+else
+{
+e=courant;
+if(e!=NULL)
+{
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+couranttry=cd(direction,e);
+if(couranttry!=NULL)
+{
+if(trash==NULL)
+{
+trash=creer(couranttry);
+}
+else
+{
+suppN(couranttry,trash);
+}
+}
+}
+}
+}
+if(rep[0]=='Y')
+{
+if(direction[0]!='/')
+{
+couranttry=cd(direction,courant);
+if(couranttry!=NULL)
+{
+suppD(couranttry);
+}
+}
+else
+{
+e=courant;
+if(e!=NULL)
+{
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+couranttry=cd(direction,e);
+if(couranttry!=NULL)
+{
+suppD(couranttry);
+}
+}
+}
+}
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+case 12:
+if(trash==NULL)
+{
+
+
+printf("Corbeille vide\n");
+}
+listertrash(trash);
+printf("quel rep/fichier voulez vous recuperer?\n");
+gets(direction);
+couranttry=taketrash(trash,direction);
+if(couranttry!=NULL)
+{printf("ou vous voulez placer le rep/fichier %s
+:",direction);
+gets(direction2);
+if(direction2[0]!='/')
+{
+cour=cdrelatif(direction2,courant);
+if(cour!=NULL)
+{
+dep(couranttry,cour);
+}
+}
+else
+{
+e=courant;
+if(e!=NULL)
+{
+while(e->pere!=NULL)
+{
+e=e->pere;
+}
+cour=cdrelatif(direction2,e);
+if(cour!=NULL)
+{
+dep(couranttry,cour);
+}
+}
+}
+
+}
+else
+{
+printf("le fichier/rep que vous voulez n'existe pas dans la
+corbeille\n");
+}
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+case 13:
+printf("voulez vous vider la corbeille ? Y/N:
+");
+gets(rep);
+if(rep[0]=='Y')
+{
+vider(trash);
+free(trash);
+trash=NULL;
+}
+printf("Cliquez sur un bouton pour continuer \n");
+getc(stdin);
+fflush(stdin);
+break;
+case 14:
+exit(1);
+break;
+}
+}
+
+
+}
+
