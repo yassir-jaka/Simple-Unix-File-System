@@ -11,15 +11,12 @@ struct fich* fils;
 struct fich* frere;
 }noeud;
 
-2->volume
 
 typedef struct Corbeille
 {
 noeud* fich; //1->repertoire 0->fichier
 struct Corbeille* suivant;
 }Corbeille;
-
-2->volume
 
 int verifyrep(noeud* courant,char* nom);
 noeud* cvolume();
